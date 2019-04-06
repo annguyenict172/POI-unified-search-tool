@@ -1,13 +1,14 @@
 from flask import Flask, jsonify
 from marshmallow import Schema, fields
-import requests
 
 from config import Config
 from app.helper import parse_args_with
-from app.constant import FoursquareEndpoint, GoogleEndpoint
+from app.api import GooglePlaceAPI, FoursquareAPI
 
 app = Flask(__name__)
 app.config.from_object(Config)
+google_api = GooglePlaceAPI()
+foursquare_api = FoursquareAPI()
 
 
 class FindPlaceSchema(Schema):
@@ -17,8 +18,5 @@ class FindPlaceSchema(Schema):
 @app.route('/places/explore')
 @parse_args_with(FindPlaceSchema)
 def explore_places(args):
-    response = requests.get(GoogleEndpoint.FREE_TEXT_SEARCH, params={
-        'query': args['query'],
-        'key': Config.GOOGLE_PLACE_API_KEY
-    })
+    response = google_api.freetext_search(params=args)
     return jsonify(response.json())
