@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Food",
+    "google_values": ["bakery", "meal_delivery", "meal_takeaway", "restaurant"],
+    "foursquare_values": ["food"]
+  },
+  {
+    "id": 2,
+    "name": "Drinks",
+    "google_values": ["bar", "cafe"],
+    "foursquare_values": ["drinks", "coffee"]
+  },
+  {
+    "id": 2,
+    "name": "Shops",
+    "google_values": ["clothing_store", "convenience_store", "shoe_store", "shopping_mall", "supermarket"],
+    "foursquare_values": ["shops"]
+  },
+  {
+    "id": 3,
+    "name": "Arts",
+    "google_value": ["art_gallery"],
+    "foursquare_value": ["arts"]
+  },
+  {
+    "id": 4,
+    "name": "Entertainment",
+    "google_value": ["bowling_alley", "casino", "movie_theater", "museum", "night_club"],
+    "foursquare_value": []
+  },
+  {
+    "id": 5,
+    "name": "Sights",
+    "google_value": ["mosque", "park", "stadium", "zoo"],
+    "foursquare_value": ["sights", "outdoors"]
+  },
+  {
+    "id": 6,
+    "name": "Trending",
+    "google_value": [],
+    "foursquare_value": ["trending"]
+  },
+  {
+    "id": 7,
+    "name": "Top picks",
+    "google_value": [],
+    "foursquare_value": ["topPicks"]
+  }
+]
