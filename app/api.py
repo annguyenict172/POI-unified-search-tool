@@ -51,9 +51,6 @@ class GooglePlaceAPI(BaseAPI):
         'key': Config.GOOGLE_PLACE_API_KEY
     }
 
-    def __init__(self):
-        super(BaseAPI, self).__init__()
-
     def freetext_search(self, params):
         return self._call_api(self._endpoints.FREE_TEXT_SEARCH, params)
 
@@ -61,7 +58,8 @@ class GooglePlaceAPI(BaseAPI):
         return self._call_api(self._endpoints.FIND_PLACE, params)
 
     def nearby_search(self, params):
-        return self._call_api(self._endpoints.NEARBY_SEARCH, params)
+        response = self._call_api(self._endpoints.NEARBY_SEARCH, params)
+        return response.json()['results']
 
     def get_place_detail(self, params):
         return self._call_api(self._endpoints.PLACE_DETAIL, params)
@@ -78,11 +76,9 @@ class FoursquareAPI(BaseAPI):
         'v': '20190406'
     }
 
-    def __init__(self):
-        super(BaseAPI, self).__init__()
-
     def search_venues(self, params):
-        return self._call_api(self._endpoints.VENUE_RECOMMENDATIONS, params)
+        response = self._call_api(self._endpoints.VENUE_RECOMMENDATIONS, params)
+        return response.json()['response']['groups'][0]['items']
 
     def get_venue_detail(self, venue_id, params):
         return self._call_api(self._endpoints.VENUE_DETAIL(venue_id), params)
