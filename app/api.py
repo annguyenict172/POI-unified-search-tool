@@ -45,6 +45,40 @@ class BaseAPI:
         })
 
 
+class GoogleResponseAdapter:
+    def __init__(self, response):
+        self.response = response
+
+    def serialize(self):
+        results = self.response.json()['results']
+        return [
+            {
+                'id': result['place_id'],
+                'lat': result['geometry']['location']['lat'],
+                'long': result['geometry']['location']['lng'],
+                'types': result['types'],
+                'name': result['name']
+            } for result in results
+        ]
+
+
+class FoursquareResponseAdapter:
+    def __init__(self, response):
+        self.response = response
+
+    def serialize(self):
+        results = self.response.json()['response']['groups'][0]['items']
+        return [
+            {
+                'id': result['venue']['id'],
+                'lat': result['venue']['location']['lat'],
+                'long': result['venue']['location']['lng'],
+                'types': [category['name'] for category in result['venue']['categories']],
+                'name': result['venue']['name']
+            } for result in results
+        ]
+
+
 class GooglePlaceAPI(BaseAPI):
     _endpoints = GoogleEndpoint
     _authen_params = {
@@ -59,7 +93,7 @@ class GooglePlaceAPI(BaseAPI):
 
     def nearby_search(self, params):
         response = self._call_api(self._endpoints.NEARBY_SEARCH, params)
-        return response.json()['results']
+        return GoogleResponseAdapter(response).serialize()
 
     def get_place_detail(self, params):
         return self._call_api(self._endpoints.PLACE_DETAIL, params)
@@ -78,7 +112,7 @@ class FoursquareAPI(BaseAPI):
 
     def search_venues(self, params):
         response = self._call_api(self._endpoints.VENUE_RECOMMENDATIONS, params)
-        return response.json()['response']['groups'][0]['items']
+        return FoursquareResponseAdapter(response).serialize()
 
     def get_venue_detail(self, venue_id, params):
         return self._call_api(self._endpoints.VENUE_DETAIL(venue_id), params)
