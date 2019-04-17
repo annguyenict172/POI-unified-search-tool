@@ -1,17 +1,22 @@
 from flask import Flask, jsonify
 from marshmallow import Schema, fields
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from config import Config
 from app.helper import parse_args_with
 from app.api import GooglePlaceAPI, FoursquareAPI
-from engines.category import load_categories
 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 google_api = GooglePlaceAPI()
 foursquare_api = FoursquareAPI()
+
+from app.models import *
 
 
 class FindPlaceSchema(Schema):
@@ -34,14 +39,3 @@ def explore_places(args):
         'query': args['query']
     })
     return jsonify(places)
-
-
-class CategorySchema(Schema):
-    id = fields.Integer()
-    name = fields.String()
-
-
-@app.route('/categories')
-def get_categories():
-    categories = load_categories()
-    return jsonify(CategorySchema().dump(categories, True).data)

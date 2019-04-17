@@ -19,3 +19,8 @@ def parse_args_with(schema):
         return decorated_function
 
     return parse_args_with_decorator
+
+
+def snake_case_to_lower_words(snake_string):
+    components = snake_string.split('_')
+    return ' '.join(x for x in components)
