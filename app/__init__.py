@@ -6,36 +6,25 @@ from flask_migrate import Migrate
 
 from config import Config
 from app.helper import parse_args_with
-from app.api import GooglePlaceAPI, FoursquareAPI
+from app import argument_extractor
 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-google_api = GooglePlaceAPI()
-foursquare_api = FoursquareAPI()
 
 from app.models import *
+from app.query_dispatcher import QueryDispatcher
 
 
 class FindPlaceSchema(Schema):
-    query = fields.String(missing=None)
-    lat = fields.Float(required=True)
-    long = fields.Float(required=True)
+    query = fields.String(required=True)
 
 
 @app.route('/places/explore')
 @parse_args_with(FindPlaceSchema)
 def explore_places(args):
-    places = google_api.nearby_search(params={
-        'location': '{},{}'.format(args['lat'], args['long']),
-        'radius': 2000,
-        'keyword': args['query']
-    }) + foursquare_api.search_venues(params={
-        'll': '{},{}'.format(args['lat'], args['long']),
-        'radius': 2000,
-        'limit': 10,
-        'query': args['query']
-    })
-    return jsonify(places)
+    arguments = argument_extractor.extract_arguments(args['query'])
+    query_dispatcher = QueryDispatcher(args=arguments)
+    return jsonify(query_dispatcher.dispatch_query())
