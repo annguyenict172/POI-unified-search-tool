@@ -5,6 +5,7 @@ from config import Config
 
 GOOGLE_BASE_URL = 'https://maps.googleapis.com/maps/api'
 FOURSQUARE_BASE_URL = 'https://api.foursquare.com/v2/venues'
+FACEBOOK_BASE_URL = 'https://graph.facebook.com'
 
 
 class GoogleEndpoint:
@@ -36,19 +37,23 @@ class FoursquareEndpoint:
         return '{}/{}/menu'.format(FOURSQUARE_BASE_URL, venue_id)
 
 
+class FacebookEndpoint:
+    FIND_PLACE = '{}/search'.format(FACEBOOK_BASE_URL)
+
+
 class BaseAPI:
-    _authen_params = {}
+    _base_params = {}
 
     def _call_api(self, endpoint, params):
         return requests.get(endpoint, params={
             **params,
-            **self._authen_params
+            **self._base_params
         })
 
 
 class GooglePlaceAPI(BaseAPI):
     _endpoints = GoogleEndpoint
-    _authen_params = {
+    _base_params = {
         'key': Config.GOOGLE_PLACE_API_KEY
     }
 
@@ -75,7 +80,7 @@ class GooglePlaceAPI(BaseAPI):
 
 class FoursquareAPI(BaseAPI):
     _endpoints = FoursquareEndpoint
-    _authen_params = {
+    _base_params = {
         'oauth_token': Config.FOURSQUARE_OAUTH_TOKEN,
         'v': '20190406'
     }
@@ -94,3 +99,14 @@ class FoursquareAPI(BaseAPI):
 
     def get_venue_menu(self, venue_id, params):
         return self._call_api(self._endpoints.VENUE_MENU(venue_id), params)
+
+
+class FacebookAPI(BaseAPI):
+    _endpoints = FacebookEndpoint
+    _base_params = {
+        'type': 'place',
+        'access_token': Config.FACEBOOK_ACCESS_TOKEN
+    }
+
+    def find_places(self, params):
+        return self._call_api(self._endpoints.FIND_PLACE, params)

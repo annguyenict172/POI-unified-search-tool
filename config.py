@@ -15,3 +15,4 @@ class Config(object):
     FOURSQUARE_OAUTH_TOKEN = os.environ.get('FOURSQUARE_OAUTH_TOKEN')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/app.db'.format(base_dir)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    FACEBOOK_ACCESS_TOKEN = os.environ.get('FACEBOOK_ACCESS_TOKEN')
