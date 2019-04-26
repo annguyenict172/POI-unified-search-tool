@@ -4,7 +4,7 @@ import sys
 from app.helper import snake_case_to_lower_words
 from app import db
 from app.models import Category
-from app.enum import Service
+from app.constants import Service
 
 
 def add_google_categories():

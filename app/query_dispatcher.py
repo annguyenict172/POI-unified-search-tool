@@ -1,5 +1,7 @@
+import json
+
 from app.api import FoursquareAPI, GooglePlaceAPI, FacebookAPI
-from app.models import Category
+from app.constants import Service
 
 
 class QueryDispatcher:
@@ -15,12 +17,16 @@ class QueryDispatcher:
             return False
         return True
 
-    def dispatch_query(self):
-        res = self.google_api.get_geocoding(self.args['location'])
-        geometry = res.json()['results'][0]['geometry']['location']
-        # results = self._query_from_google(geometry) + self._query_from_foursquare(geometry)
-        # results.sort(key=lambda x: x['core_info']['name'])
-        return self._query_from_facebook(geometry)
+    def dispatch_explore_query(self):
+        foursquare_file = open('files/foursquare.json', 'r')
+        facebook_file = open('files/facebook.json', 'r')
+        google_file = open('files/google.json', 'r')
+        results = {
+            Service.GOOGLE: json.load(google_file),
+            Service.FACEBOOK: json.load(facebook_file),
+            Service.FOURSQUARE: json.load(foursquare_file)
+        }
+        return results
 
     def _query_from_facebook(self, geometry):
         after = None
@@ -29,8 +35,6 @@ class QueryDispatcher:
             res = self.facebook_api.find_places({
                 'center': '{},{}'.format(geometry['lat'], geometry['lng']),
                 'distance': 1000,
-                # 'fields': 'id,about,distance,checkins,description,location,name,overall_star_rating,phone,'
-                #           'website,photos,picture',
                 'fields': 'id,about,description,name,location,phone,picture,website,overall_star_rating,checkins',
                 'after': after,
                 'categories': '["FOOD_BEVERAGE"]'
@@ -44,91 +48,46 @@ class QueryDispatcher:
                     break
             else:
                 break
-        print(len(results))
         return results
 
-    def _query_from_google(self, geometry):
+    def _query_from_google(self):
         results = []
-        for type in self._find_matched_categories('Google'):
+        for type in self.args['types'].get('Google'):
             pagetoken = None
             while True:
                 res = self.google_api.nearby_search({
-                    'location': '{},{}'.format(geometry['lat'], geometry['lng']),
+                    'location': '{},{}'.format(
+                        self.args['geometry']['lat'],
+                        self.args['geometry']['lng']
+                    ),
                     'radius': 1000,
                     'type': type,
                     'pagetoken': pagetoken
                 })
                 pagetoken = res.json().get('next_page_token')
-                items = res.json()['results']
-                for item in items:
-                    item['core_info'] = {
-                        'name': item['name'],
-                        'location': item['geometry']['location']
-                    }
-                results.extend(items)
+                results.extend(res.json()['results'])
                 if pagetoken is None:
                     break
         return results
 
-    def _query_from_foursquare(self, geometry):
+    def _query_from_foursquare(self):
         results = []
         total_results = 1000000
         last_length = 0
         while len(results) < total_results:
             res = self.foursquare_api.search_venues({
-                'll': '{},{}'.format(geometry['lat'], geometry['lng']),
+                'll': '{},{}'.format(
+                    self.args['geometry']['lat'],
+                    self.args['geometry']['lng']
+                ),
                 'limit': 50,
                 'offset': len(results),
-                'section': 'food',
+                'section': 'coffee',
                 'radius': 1000
             })
-            items = res.json()['response']['groups'][0]['items']
-            for item in items:
-                item['core_info'] = {
-                    'name': item['venue']['name'],
-                    'location': item['venue']['location']
-                }
-            results.extend(items)
+            results.extend(res.json()['response']['groups'][0]['items'])
             total_results = res.json()['response']['totalResults']
             if len(results) == last_length:
                 break
             last_length = len(results)
         return results
-
-        # results = []
-        # categoryId = ','.join(self._find_matched_categories('Foursquare'))
-        # total_results = 1000000
-        # last_length = 0
-        # while len(results) < total_results:
-        #     res = self.foursquare_api.search_venues({
-        #         'll': '{},{}'.format(geometry['lat'], geometry['lng']),
-        #         'limit': 50,
-        #         'offset': len(results),
-        #         'categoryId': categoryId,
-        #         'radius': 1000
-        #     })
-        #     items = res.json()['response']['venues']
-        #     for item in items:
-        #         item['core_info'] = {
-        #             'name': item['name'],
-        #             'location': item['location']
-        #         }
-        #     results.extend(items)
-        #     total_results = res.json()['response'].get('totalResults')
-        #     if total_results is None:
-        #         total_results = 0
-        #     if len(results) == last_length:
-        #         break
-        #     last_length = len(results)
-        # return results
-
-    def _find_matched_categories(self, service):
-        types = []
-        for type in self.args['types']:
-            categories = Category.query.filter(
-                Category.service == service,
-                Category.formatted_text.like('%{}%'.format(type))
-            ).all()
-            for category in categories:
-                types.append(category.service_identifier)
-        return types
