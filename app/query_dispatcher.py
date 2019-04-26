@@ -2,6 +2,7 @@ import json
 
 from app.api import FoursquareAPI, GooglePlaceAPI, FacebookAPI
 from app.constants import Service
+from app.schemas import FacebookSchema, GoogleSchema, FoursquareSchema
 
 
 class QueryDispatcher:
@@ -22,9 +23,9 @@ class QueryDispatcher:
         facebook_file = open('files/facebook.json', 'r')
         google_file = open('files/google.json', 'r')
         results = {
-            Service.GOOGLE: json.load(google_file),
-            Service.FACEBOOK: json.load(facebook_file),
-            Service.FOURSQUARE: json.load(foursquare_file)
+            Service.GOOGLE: GoogleSchema().dump(json.load(google_file), many=True).data,
+            Service.FACEBOOK: FacebookSchema().dump(json.load(facebook_file), many=True).data,
+            Service.FOURSQUARE: FoursquareSchema().dump(json.load(foursquare_file), many=True).data
         }
         return results
 
