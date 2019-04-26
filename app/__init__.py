@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 from config import Config
-from app.helper import parse_args_with
+from app.decorators import parse_args_with
 
 app = Flask(__name__)
 app.config.from_object(Config)

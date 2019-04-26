@@ -11,6 +11,7 @@ marshmallow = "*"
 flask-cors = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
+fuzzywuzzy = "*"
 
 [dev-packages]
 
