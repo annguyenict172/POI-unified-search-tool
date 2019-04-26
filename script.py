@@ -1,52 +1,131 @@
-import json
 import sys
 
-from app.utils.string import snake_case_to_lower_words
 from app import db
 from app.models import Category
 from app.constants import Service
 
 
 def add_google_categories():
-    f = open('files/google_category.txt', 'r')
-    for line in f.readlines():
-        category_name = line.strip()
-        category = Category(
-            raw_text=category_name,
-            formatted_text=snake_case_to_lower_words(category_name),
-            service=Service.GOOGLE,
-            service_identifier=category_name
-        )
-        db.session.add(category)
-        db.session.commit()
+    category = Category(
+        text='food',
+        service=Service.GOOGLE,
+        service_identifier='restaurant'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='restaurant',
+        service=Service.GOOGLE,
+        service_identifier='restaurant'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='bar',
+        service=Service.GOOGLE,
+        service_identifier='bar'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='drinks',
+        service=Service.GOOGLE,
+        service_identifier='bar'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='coffee',
+        service=Service.GOOGLE,
+        service_identifier='coffee'
+    )
+    db.session.add(category)
+
+    db.session.commit()
 
 
 def add_foursquare_categories():
-    f = open('files/foursquare_category.json')
-    data = json.load(f)['response']
-    for main_category in data['categories']:
-        category = Category(
-            raw_text=main_category['name'],
-            formatted_text=main_category['name'].lower(),
-            service=Service.FOURSQUARE,
-            service_identifier=main_category['id']
-        )
-        db.session.add(category)
-        db.session.commit()
-        for child_category in main_category['categories']:
-            category = Category(
-                raw_text=child_category['name'],
-                formatted_text=child_category['name'].lower(),
-                service='Foursquare',
-                service_identifier=child_category['id']
-            )
-            db.session.add(category)
-            db.session.commit()
+    category = Category(
+        text='food',
+        service=Service.FOURSQUARE,
+        service_identifier='food'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='restaurant',
+        service=Service.FOURSQUARE,
+        service_identifier='food'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='bar',
+        service=Service.FOURSQUARE,
+        service_identifier='drinks'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='drinks',
+        service=Service.FOURSQUARE,
+        service_identifier='drinks'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='coffee',
+        service=Service.FOURSQUARE,
+        service_identifier='coffee'
+    )
+    db.session.add(category)
+
+    db.session.commit()
+
+
+def add_facebook_categories():
+    category = Category(
+        text='food',
+        service=Service.FACEBOOK,
+        service_identifier='FOOD_BEVERAGE'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='restaurant',
+        service=Service.FACEBOOK,
+        service_identifier='FOOD_BEVERAGE'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='bar',
+        service=Service.FACEBOOK,
+        service_identifier='FOOD_BEVERAGE'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='drinks',
+        service=Service.FACEBOOK,
+        service_identifier='FOOD_BEVERAGE'
+    )
+    db.session.add(category)
+
+    category = Category(
+        text='coffee',
+        service=Service.FACEBOOK,
+        service_identifier='FOOD_BEVERAGE'
+    )
+    db.session.add(category)
+
+    db.session.commit()
 
 
 def add_service_categories():
-    add_google_categories()
     add_foursquare_categories()
+    add_google_categories()
+    add_facebook_categories()
 
 
 scripts = {

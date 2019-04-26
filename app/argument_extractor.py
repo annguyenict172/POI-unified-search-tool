@@ -22,12 +22,12 @@ def extract_arguments(query_text):
 
 
 def _find_matched_categories(terms, service):
-    types = []
+    types = set()
     for term in terms:
         categories = Category.query.filter(
             Category.service == service,
-            Category.formatted_text.like('%{}%'.format(term))
+            Category.text.like('%{}%'.format(term))
         ).all()
         for category in categories:
-            types.append(category.service_identifier)
+            types.add(category.service_identifier)
     return types

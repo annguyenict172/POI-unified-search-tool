@@ -42,11 +42,13 @@ class QueryDispatcher:
         after = None
         results = []
         while True:
+            types = ['"{}"'.format(t) for t in self.args['types'].get(Service.FACEBOOK)]
+            categories = '[' + ','.join(types) + ']'
             params = {
                 'center': '{},{}'.format(self.args['geometry']['lat'], self.args['geometry']['lng']),
                 'distance': 1000,
                 'fields': 'id,about,description,name,location,phone,picture,website,overall_star_rating,checkins',
-                'categories': '["FOOD_BEVERAGE"]',
+                'categories': categories,
                 'after': after
             }
             res = self.facebook_api.find_places(params=params)
@@ -84,22 +86,23 @@ class QueryDispatcher:
 
     def _query_from_foursquare(self):
         results = []
-        total_results = 1000000
-        last_length = 0
-        while len(results) < total_results:
-            res = self.foursquare_api.search_venues({
-                'll': '{},{}'.format(
-                    self.args['geometry']['lat'],
-                    self.args['geometry']['lng']
-                ),
-                'limit': 50,
-                'offset': len(results),
-                'section': 'coffee',
-                'radius': 1000
-            })
-            results.extend(res.json()['response']['groups'][0]['items'])
-            total_results = res.json()['response']['totalResults']
-            if len(results) == last_length:
-                break
-            last_length = len(results)
+        for type in self.args['types'].get(Service.FOURSQUARE):
+            total_results = 1000000
+            last_length = 0
+            while len(results) < total_results:
+                res = self.foursquare_api.search_venues({
+                    'll': '{},{}'.format(
+                        self.args['geometry']['lat'],
+                        self.args['geometry']['lng']
+                    ),
+                    'limit': 50,
+                    'offset': len(results),
+                    'section': 'coffee',
+                    'radius': 1000
+                })
+                results.extend(res.json()['response']['groups'][0]['items'])
+                total_results = res.json()['response']['totalResults']
+                if len(results) == last_length:
+                    break
+                last_length = len(results)
         return FoursquareSchema().dump(results, many=True).data

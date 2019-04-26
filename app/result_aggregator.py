@@ -26,6 +26,7 @@ class ResultAggregator:
 
             results.extend(items)
 
+        # Sort the items by name
         results.sort(key=lambda x: x['name'])
 
         # Map phase
@@ -35,7 +36,7 @@ class ResultAggregator:
                 item['distinct_id'] = str(uuid.uuid4())
                 continue
             else:
-                previous_item = results[i - 1]
+                previous_item = results[i-1]
                 distance = get_euclidean_distance(results[i-1], item)
                 name_similarity = get_similar_ratio(results[i-1]['name'], item['name'])
                 if distance < 100 and name_similarity > 70 and item['service'] != previous_item['service']:
@@ -54,5 +55,4 @@ class ResultAggregator:
                 for item in similar_items:
                     merged_item[item['service']] = item
                 merged_results.append(merged_item)
-
         return merged_results
