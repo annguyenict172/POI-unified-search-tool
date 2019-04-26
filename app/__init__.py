@@ -18,6 +18,7 @@ migrate = Migrate(app, db)
 from app.models import *
 from app.query_dispatcher import QueryDispatcher
 from app import argument_extractor
+from app.result_aggregator import ResultAggregator
 
 
 class FindPlaceSchema(Schema):
@@ -28,6 +29,11 @@ class FindPlaceSchema(Schema):
 @parse_args_with(FindPlaceSchema)
 def explore_places(args):
     arguments = argument_extractor.extract_arguments(args['query'])
+
     query_dispatcher = QueryDispatcher(args=arguments)
     responses = query_dispatcher.dispatch_explore_query()
-    return jsonify(responses)
+
+    result_aggregator = ResultAggregator(responses=responses)
+    results = result_aggregator.aggregate_responses()
+
+    return jsonify(results)

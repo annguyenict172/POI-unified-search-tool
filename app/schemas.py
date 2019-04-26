@@ -1,5 +1,7 @@
 from marshmallow import fields, Schema
 
+from app.constants import Service
+
 
 class FacebookSchema(Schema):
     about = fields.String()
@@ -14,6 +16,7 @@ class FacebookSchema(Schema):
     phone = fields.String()
     picture = fields.Dict()
     website = fields.String()
+    service = fields.String(default=Service.FACEBOOK)
 
 
 class FoursquareSchema(Schema):
@@ -24,6 +27,7 @@ class FoursquareSchema(Schema):
     name = fields.String(attribute='venue.name')
     lat = fields.Float(attribute='venue.location.lat')
     lng = fields.Float(attribute='venue.location.lng')
+    service = fields.String(default=Service.FOURSQUARE)
 
 
 class GoogleSchema(Schema):
@@ -43,3 +47,4 @@ class GoogleSchema(Schema):
     types = fields.List(fields.String())
     user_ratings_total = fields.Integer()
     vicinity = fields.String()
+    service = fields.String(default=Service.GOOGLE)
