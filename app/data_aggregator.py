@@ -5,16 +5,16 @@ from app.utils.math import get_euclidean_distance
 from app.utils.string import get_similar_ratio
 
 
-class ResultAggregator:
-    def __init__(self, responses):
-        self.responses = responses
+class DataAggregator:
+    def __init__(self, data):
+        self.data = data
 
-    def aggregate_responses(self):
+    def aggregate_data(self):
         results = []
 
         # Add response from different services to a single list
         for service in Service.get_list():
-            items = self.responses[service]
+            items = self.data[service]
 
             # Remove duplicate items in a service's response
             appears = {}

@@ -6,7 +6,7 @@ from app.constants import Service
 from app.schemas import FacebookSchema, GoogleSchema, FoursquareSchema
 
 
-class QueryDispatcher:
+class APIDispatcher:
     foursquare_api = FoursquareAPI()
     google_api = GooglePlaceAPI()
     facebook_api = FacebookAPI()
@@ -19,7 +19,7 @@ class QueryDispatcher:
             return False
         return True
 
-    def dispatch_explore_query(self):
+    def dispatch_api_calls(self):
         is_demo = os.environ.get('DEMO', False)
         if is_demo:
             foursquare_file = open('files/foursquare.json', 'r')

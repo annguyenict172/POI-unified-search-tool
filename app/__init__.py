@@ -14,9 +14,9 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from app.models import *
-from app.query_dispatcher import QueryDispatcher
+from app.api_dispatcher import APIDispatcher
 from app import argument_extractor
-from app.result_aggregator import ResultAggregator
+from app.data_aggregator import DataAggregator
 
 
 class FindPlaceSchema(Schema):
@@ -28,10 +28,10 @@ class FindPlaceSchema(Schema):
 def explore_places(args):
     arguments = argument_extractor.extract_arguments(args['query'])
 
-    query_dispatcher = QueryDispatcher(args=arguments)
-    responses = query_dispatcher.dispatch_explore_query()
+    api_dispatcher = APIDispatcher(args=arguments)
+    responses = api_dispatcher.dispatch_api_calls()
 
-    result_aggregator = ResultAggregator(responses=responses)
-    results = result_aggregator.aggregate_responses()
+    data_aggregator = DataAggregator(data=responses)
+    results = data_aggregator.aggregate_data()
 
     return jsonify(results)
