@@ -3,7 +3,6 @@ import os
 
 from app.api import FoursquareAPI, GooglePlaceAPI, FacebookAPI
 from app.constants import Service
-from app.schemas import FacebookSchema, GoogleSchema, FoursquareSchema
 
 
 class APIDispatcher:
@@ -26,9 +25,9 @@ class APIDispatcher:
             facebook_file = open('files/facebook.json', 'r')
             google_file = open('files/google.json', 'r')
             results = {
-                Service.GOOGLE: GoogleSchema().dump(json.load(google_file), many=True).data,
-                Service.FACEBOOK: FacebookSchema().dump(json.load(facebook_file), many=True).data,
-                Service.FOURSQUARE: FoursquareSchema().dump(json.load(foursquare_file), many=True).data
+                Service.GOOGLE: json.load(google_file),
+                Service.FACEBOOK: json.load(facebook_file),
+                Service.FOURSQUARE: json.load(foursquare_file)
             }
         else:
             results = {
@@ -62,7 +61,7 @@ class APIDispatcher:
                     break
             else:
                 break
-        return FacebookSchema().dump(results, many=True).data
+        return results
 
     def _query_from_google(self):
         results = []
@@ -82,7 +81,7 @@ class APIDispatcher:
                 results.extend(res.json()['results'])
                 if pagetoken is None:
                     break
-        return GoogleSchema().dump(results, many=True).data
+        return results
 
     def _query_from_foursquare(self):
         results = []
@@ -97,7 +96,7 @@ class APIDispatcher:
                     ),
                     'limit': 50,
                     'offset': len(results),
-                    'section': 'coffee',
+                    'section': type,
                     'radius': 1000
                 })
                 results.extend(res.json()['response']['groups'][0]['items'])
@@ -105,4 +104,4 @@ class APIDispatcher:
                 if len(results) == last_length:
                     break
                 last_length = len(results)
-        return FoursquareSchema().dump(results, many=True).data
+        return results
