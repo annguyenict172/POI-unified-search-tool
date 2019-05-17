@@ -21,11 +21,11 @@ class APIDispatcher:
         }
 
     def dispatch_api_calls(self):
-        is_demo = os.environ.get('DEMO', 'Y')
-        if is_demo == 'Y':
-            foursquare_file = open('files/foursquare.json', 'r')
-            facebook_file = open('files/facebook.json', 'r')
-            google_file = open('files/google.json', 'r')
+        demo_city = os.environ.get('DEMO_CITY', None)
+        if demo_city:
+            foursquare_file = open('files/foursquare-{}.json'.format(demo_city), 'r')
+            facebook_file = open('files/facebook-{}.json'.format(demo_city), 'r')
+            google_file = open('files/google-{}.json'.format(demo_city), 'r')
             self.results = {
                 Service.GOOGLE: json.load(google_file),
                 Service.FACEBOOK: json.load(facebook_file),
@@ -68,6 +68,9 @@ class APIDispatcher:
                     break
             else:
                 break
+        with open('files/facebook-Sydney.json', 'w') as outfile:
+            json.dump(results, outfile)
+        print('FACEBOOK {}'.format(len(results)))
         self.results[Service.FACEBOOK] = results
 
     def _query_from_google(self):
@@ -95,6 +98,9 @@ class APIDispatcher:
                 results.extend(res.json()['results'])
                 if pagetoken is None:
                     break
+        with open('files/google-Sydney.json', 'w') as outfile:
+            json.dump(results, outfile)
+        print('GOOGLE {}'.format(len(results)))
         self.results[Service.GOOGLE] = results
 
     def _query_from_foursquare(self):
@@ -113,7 +119,6 @@ class APIDispatcher:
                     res = self.foursquare_api.search_venues(params=params)
                     temp_results.extend(res.json()['response']['groups'][0]['items'])
                     total_results = res.json()['response']['totalResults']
-                    print(total_results)
                     if len(temp_results) == last_length:
                         break
                     last_length = len(temp_results)
@@ -130,4 +135,7 @@ class APIDispatcher:
                 if len(results) == last_length:
                     break
                 last_length = len(results)
+        with open('files/foursquare-Sydney.json', 'w') as outfile:
+            json.dump(results, outfile)
+        print('FOURSQUARE {}'.format(len(results)))
         self.results[Service.FOURSQUARE] = results

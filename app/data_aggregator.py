@@ -17,6 +17,7 @@ class DataAggregator:
         for i, item in enumerate(self.data):
             if i == 0:
                 item['distinct_id'] = str(uuid.uuid4())
+                distinct_counts[item['distinct_id']] = 1
                 continue
             else:
                 previous_item = self.data[i-1]
@@ -32,10 +33,11 @@ class DataAggregator:
         # Reduce phase
         results = []
         for key, value in distinct_counts.items():
-            if value > 1:
+            if value >= 3:
                 similar_items = [item for item in self.data if item['distinct_id'] == key]
                 merged_item = {}
                 for item in similar_items:
                     merged_item[item['service']] = item
                 results.append(merged_item)
+        print(len(results))
         return results
