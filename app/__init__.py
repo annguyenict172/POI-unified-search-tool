@@ -15,19 +15,22 @@ migrate = Migrate(app, db)
 
 from app.models import *
 from app.api_dispatcher import APIDispatcher
-from app import argument_extractor
+from app import parameter_parser
 from app.data_aggregator import DataAggregator
 from app.data_preprocessor import DataPreprocessor
 
 
 class FindPlaceSchema(Schema):
-    query = fields.String(required=True)
+    location = fields.String(required=True)
+    keyword = fields.String(missing=None)
+    radius = fields.Integer(missing=None)
+    categories = fields.String(missing=None)
 
 
 @app.route('/places/explore')
 @parse_args_with(FindPlaceSchema)
 def explore_places(args):
-    arguments = argument_extractor.extract_arguments(args['query'])
+    arguments = parameter_parser.parse_parameters(raw_params=args)
     responses = APIDispatcher(args=arguments).dispatch_api_calls()
     preprocessed_data = DataPreprocessor(data=responses).process_data()
     results = DataAggregator(data=preprocessed_data).aggregate_data()
