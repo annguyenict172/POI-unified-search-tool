@@ -51,24 +51,43 @@ class APIDispatcher:
         results = []
         params = self.args.get(Service.FACEBOOK)
         if len(params.get('categories')) > 0:
-            types = ['"{}"'.format(t) for t in params.get('categories')]
-            categories = '[' + ','.join(types) + ']'
-            params['categories'] = categories
-        while True:
-            params['after'] = after
-            params['fields'] = 'id,about,description,name,location,phone,picture,website,overall_star_rating,checkins'
-            res = self.facebook_api.find_places(params=params)
-            data = res.json().get('data')
-            if data:
-                results.extend(data)
-            paging = res.json().get('paging')
-            if paging:
-                after = paging['cursors'].get('after')
-                if after is None:
+            for category in params.get('categories'):
+                category = '["{}"]'.format(category)
+                params['categories'] = category
+                while True:
+                    params['after'] = after
+                    params['fields'] = 'id,about,description,name,location,phone,picture,website,overall_star_rating,' \
+                                       'category_list,checkins'
+                    res = self.facebook_api.find_places(params=params)
+                    data = res.json().get('data')
+                    if data:
+                        for item in data:
+                            item['unified_type'] = category
+                        results.extend(data)
+                    paging = res.json().get('paging')
+                    if paging:
+                        after = paging['cursors'].get('after')
+                        if after is None:
+                            break
+                    else:
+                        break
+        else:
+            while True:
+                params['after'] = after
+                params['fields'] = 'id,about,description,name,location,phone,picture,website,overall_star_rating,' \
+                                   'category_list,checkins'
+                res = self.facebook_api.find_places(params=params)
+                data = res.json().get('data')
+                if data:
+                    results.extend(data)
+                paging = res.json().get('paging')
+                if paging:
+                    after = paging['cursors'].get('after')
+                    if after is None:
+                        break
+                else:
                     break
-            else:
-                break
-        with open('files/facebook-Sydney.json', 'w') as outfile:
+        with open('files/facebook-HN.json', 'w') as outfile:
             json.dump(results, outfile)
         print('FACEBOOK {}'.format(len(results)))
         self.results[Service.FACEBOOK] = results
@@ -85,7 +104,10 @@ class APIDispatcher:
                     params['type'] = type
                     res = self.google_api.nearby_search(params=params)
                     pagetoken = res.json().get('next_page_token')
-                    results.extend(res.json()['results'])
+                    items = res.json()['results']
+                    for item in items:
+                        item['unified_type'] = type
+                    results.extend(items)
                     time.sleep(2)
                     if pagetoken is None:
                         break
@@ -96,9 +118,10 @@ class APIDispatcher:
                 res = self.google_api.nearby_search(params=params)
                 pagetoken = res.json().get('next_page_token')
                 results.extend(res.json()['results'])
+                time.sleep(2)
                 if pagetoken is None:
                     break
-        with open('files/google-Sydney.json', 'w') as outfile:
+        with open('files/google-HN.json', 'w') as outfile:
             json.dump(results, outfile)
         print('GOOGLE {}'.format(len(results)))
         self.results[Service.GOOGLE] = results
@@ -117,7 +140,10 @@ class APIDispatcher:
                     params['offset'] = len(temp_results)
                     params['section'] = section
                     res = self.foursquare_api.search_venues(params=params)
-                    temp_results.extend(res.json()['response']['groups'][0]['items'])
+                    items = res.json()['response']['groups'][0]['items']
+                    for item in items:
+                        item['unified_type'] = section
+                    temp_results.extend(items)
                     total_results = res.json()['response']['totalResults']
                     if len(temp_results) == last_length:
                         break
@@ -135,7 +161,7 @@ class APIDispatcher:
                 if len(results) == last_length:
                     break
                 last_length = len(results)
-        with open('files/foursquare-Sydney.json', 'w') as outfile:
+        with open('files/foursquare-HN.json', 'w') as outfile:
             json.dump(results, outfile)
         print('FOURSQUARE {}'.format(len(results)))
         self.results[Service.FOURSQUARE] = results

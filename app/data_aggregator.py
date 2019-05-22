@@ -32,12 +32,18 @@ class DataAggregator:
 
         # Reduce phase
         results = []
+        counts = {
+            1: 0,
+            2: 0,
+            3: 0
+        }
         for key, value in distinct_counts.items():
-            if value >= 3:
-                similar_items = [item for item in self.data if item['distinct_id'] == key]
-                merged_item = {}
-                for item in similar_items:
-                    merged_item[item['service']] = item
-                results.append(merged_item)
-        print(len(results))
+            counts[value] += 1
+            similar_items = [item for item in self.data if item['distinct_id'] == key]
+            merged_item = {}
+            for item in similar_items:
+                merged_item[item['service']] = item
+            results.append(merged_item)
+        print(counts)
+
         return results

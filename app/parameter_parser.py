@@ -9,19 +9,19 @@ def parse_parameters(raw_params):
             'location': raw_params.get('location'),
             'radius': raw_params.get('radius'),
             'types': _find_matched_categories(categories, Service.GOOGLE),
-            # 'keyword': raw_params.get('keyword')
+            'keyword': raw_params.get('keyword')
         },
         Service.FACEBOOK: {
             'center': raw_params.get('location'),
             'distance': raw_params.get('radius'),
             'categories': _find_matched_categories(categories, Service.FACEBOOK),
-            # 'q': raw_params.get('keyword')
+            'q': raw_params.get('keyword')
         },
         Service.FOURSQUARE: {
             'll': raw_params.get('location'),
             'radius': raw_params.get('radius'),
             'sections': _find_matched_categories(categories, Service.FOURSQUARE),
-            # 'query': raw_params.get('keyword')
+            'query': raw_params.get('keyword')
         }
     }
     return formatted_params
