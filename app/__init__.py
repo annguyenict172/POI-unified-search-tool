@@ -48,10 +48,19 @@ def explore_places(args):
             preprocessed_data = DataPreprocessor(data=responses).process_data()
             results.extend(DataAggregator(data=preprocessed_data).aggregate_data())
             Cache.set_cache_with_location(args['location'], results)
+        else:
+            print('not categories')
+            print(len(results))
+            if len(results) == 0:
+                arguments = parameter_parser.parse_parameters(raw_params=args)
+                responses = APIDispatcher(args=arguments).dispatch_api_calls()
+                preprocessed_data = DataPreprocessor(data=responses).process_data()
+                results.extend(DataAggregator(data=preprocessed_data).aggregate_data())
+                Cache.set_cache_with_location(args['location'], results)
 
     returned_results = []
     for item in results:
-        if len(item.keys()) == 1:
+        if len(item.keys()) == 3:
             returned_results.append(item)
 
     return jsonify(returned_results)
