@@ -28,28 +28,40 @@ class CacheResultFilter:
                 fb_cat = '["{}"]'.format(fb_cat)
                 for item in cache_results:
                     if item.get('facebook') \
-                            and item['facebook']['unified_type'] == fb_cat\
+                            and item['facebook'].get('unified_type') == fb_cat\
                             and get_euclidean_distance(current_location, item['facebook']) <= args['radius']\
                             and appeared['facebook'].get(item['facebook']['name']) is None:
                         counts[category] += 1
                         results.append(item)
                         appeared['facebook'][item['facebook']['name']] = True
+                        if item.get('google'):
+                            appeared['google'][item['google']['name']] = True
+                        if item.get('foursquare'):
+                            appeared['foursquare'][item['foursquare']['name']] = True
                         continue
                     elif item.get('google') \
-                            and item['google']['unified_type'] == gg_cat\
+                            and item['google'].get('unified_type') == gg_cat\
                             and get_euclidean_distance(current_location, item['google']) <= args['radius']\
                             and appeared['google'].get(item['google']['name']) is None:
                         counts[category] += 1
                         results.append(item)
                         appeared['google'][item['google']['name']] = True
+                        if item.get('facebook'):
+                            appeared['facebook'][item['facebook']['name']] = True
+                        if item.get('foursquare'):
+                            appeared['foursquare'][item['foursquare']['name']] = True
                         continue
                     elif item.get('foursquare') \
-                            and item['foursquare']['unified_type'] == fs_cat\
+                            and item['foursquare'].get('unified_type') == fs_cat\
                             and get_euclidean_distance(current_location, item['foursquare']) <= args['radius']\
                             and appeared['foursquare'].get(item['foursquare']['name']) is None:
                         counts[category] += 1
                         results.append(item)
                         appeared['foursquare'][item['foursquare']['name']] = True
+                        if item.get('google'):
+                            appeared['google'][item['google']['name']] = True
+                        if item.get('facebook'):
+                            appeared['facebook'][item['facebook']['name']] = True
                         continue
             remaining_categories = []
             for category in categories:
@@ -64,42 +76,66 @@ class CacheResultFilter:
                         and get_euclidean_distance(current_location, item['facebook']) <= args['radius']\
                         and appeared['facebook'].get(item['facebook']['name']) is None:
                     appeared['facebook'][item['facebook']['name']] = True
+                    if item.get('google'):
+                        appeared['google'][item['google']['name']] = True
+                    if item.get('foursquare'):
+                        appeared['foursquare'][item['foursquare']['name']] = True
                     results.append(item)
                     continue
                 elif item.get('google') \
                         and args.get('keyword').lower() in item['google']['name'].lower() \
-                        and get_euclidean_distance(current_location, item['google'] <= args['radius'])\
+                        and get_euclidean_distance(current_location, item['google']) <= args['radius']\
                         and appeared['google'].get(item['google']['name']) is None:
                     results.append(item)
                     appeared['google'][item['google']['name']] = True
+                    if item.get('facebook'):
+                        appeared['facebook'][item['facebook']['name']] = True
+                    if item.get('foursquare'):
+                        appeared['foursquare'][item['foursquare']['name']] = True
                     continue
                 elif item.get('foursquare') \
                         and args.get('keyword').lower() in item['foursquare']['name'].lower() \
-                        and get_euclidean_distance(current_location, item['foursquare'] <= args['radius'])\
+                        and get_euclidean_distance(current_location, item['foursquare']) <= args['radius']\
                         and appeared['foursquare'].get(item['foursquare']['name']) is None:
                     results.append(item)
                     appeared['foursquare'][item['foursquare']['name']] = True
+                    if item.get('google'):
+                        appeared['google'][item['google']['name']] = True
+                    if item.get('facebook'):
+                        appeared['facebook'][item['facebook']['name']] = True
                     continue
             return results, []
         else:
             results = []
             for item in cache_results:
                 if item.get('facebook') \
-                        and get_euclidean_distance(current_location, item['facebook'] <= args['radius'])\
+                        and get_euclidean_distance(current_location, item['facebook']) <= args['radius']\
                         and appeared['facebook'].get(item['facebook']['name']) is None:
                     appeared['facebook'][item['facebook']['name']] = True
+                    if item.get('google'):
+                        appeared['google'][item['google']['name']] = True
+                    if item.get('foursquare'):
+                        appeared['foursquare'][item['foursquare']['name']] = True
                     results.append(item)
                     continue
                 elif item.get('google') \
-                        and get_euclidean_distance(current_location, item['google'] <= args['radius'])\
+                        and get_euclidean_distance(current_location, item['google']) <= args['radius']\
                         and appeared['google'].get(item['google']['name']) is None:
                     results.append(item)
                     appeared['google'][item['google']['name']] = True
+                    if item.get('facebook'):
+                        appeared['facebook'][item['facebook']['name']] = True
+                    if item.get('foursquare'):
+                        appeared['foursquare'][item['foursquare']['name']] = True
                     continue
                 elif item.get('foursquare') \
-                        and get_euclidean_distance(current_location, item['foursquare'] <= args['radius'])\
+                        and get_euclidean_distance(current_location, item['foursquare']) <= args['radius']\
                         and appeared['foursquare'].get(item['foursquare']['name']) is None:
                     results.append(item)
                     appeared['foursquare'][item['foursquare']['name']] = True
+                    if item.get('google'):
+                        appeared['google'][item['google']['name']] = True
+                    if item.get('facebook'):
+                        appeared['facebook'][item['facebook']['name']] = True
                     continue
             return results, []

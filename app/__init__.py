@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, jsonify
 from marshmallow import Schema, fields
 from flask_cors import CORS
@@ -20,6 +22,7 @@ from app.data_aggregator import DataAggregator
 from app.data_preprocessor import DataPreprocessor
 from app.cache import Cache
 from app.cache_result_filter import CacheResultFilter
+from app.constants import Service
 
 
 class FindPlaceSchema(Schema):
@@ -46,21 +49,41 @@ def explore_places(args):
             arguments = parameter_parser.parse_parameters(raw_params=args)
             responses = APIDispatcher(args=arguments).dispatch_api_calls()
             preprocessed_data = DataPreprocessor(data=responses).process_data()
-            results.extend(DataAggregator(data=preprocessed_data).aggregate_data())
-            Cache.set_cache_with_location(args['location'], results)
+            new_results = DataAggregator(data=preprocessed_data).aggregate_data()
+            results.extend(new_results)
+            cache_results.extend(new_results)
+            Cache.set_cache_with_location(args['location'], cache_results)
         else:
-            print('not categories')
-            print(len(results))
-            if len(results) == 0:
+            if len(results) < 10:
                 arguments = parameter_parser.parse_parameters(raw_params=args)
                 responses = APIDispatcher(args=arguments).dispatch_api_calls()
                 preprocessed_data = DataPreprocessor(data=responses).process_data()
-                results.extend(DataAggregator(data=preprocessed_data).aggregate_data())
-                Cache.set_cache_with_location(args['location'], results)
+                new_results = DataAggregator(data=preprocessed_data).aggregate_data()
+                results.extend(new_results)
+                cache_results.extend(new_results)
+                Cache.set_cache_with_location(args['location'], cache_results)
 
     returned_results = []
+    statistic = {
+        Service.GOOGLE: 0,
+        Service.FACEBOOK: 0,
+        Service.FOURSQUARE: 0,
+        '1': 0,
+        '2': 0,
+        '3': 0
+    }
     for item in results:
+        if item.get(Service.FOURSQUARE):
+            statistic[Service.FOURSQUARE] += 1
+        if item.get(Service.FACEBOOK):
+            statistic[Service.FACEBOOK] += 1
+        if item.get(Service.GOOGLE):
+            statistic[Service.GOOGLE] += 1
+        statistic[str(len(item.keys()))] += 1
         if len(item.keys()) == 3:
             returned_results.append(item)
 
-    return jsonify(returned_results)
+    return jsonify({
+        'statistics': statistic,
+        'results': returned_results
+    })
