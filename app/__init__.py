@@ -22,7 +22,7 @@ from app.data_aggregator import DataAggregator
 from app.data_preprocessor import DataPreprocessor
 from app.cache import Cache
 from app.cache_result_filter import CacheResultFilter
-from app.constants import Service
+from app.constants import Provider
 
 
 class FindPlaceSchema(Schema):
@@ -65,20 +65,20 @@ def explore_places(args):
 
     returned_results = []
     statistic = {
-        Service.GOOGLE: 0,
-        Service.FACEBOOK: 0,
-        Service.FOURSQUARE: 0,
+        Provider.GOOGLE: 0,
+        Provider.FACEBOOK: 0,
+        Provider.FOURSQUARE: 0,
         '1': 0,
         '2': 0,
         '3': 0
     }
     for item in results:
-        if item.get(Service.FOURSQUARE):
-            statistic[Service.FOURSQUARE] += 1
-        if item.get(Service.FACEBOOK):
-            statistic[Service.FACEBOOK] += 1
-        if item.get(Service.GOOGLE):
-            statistic[Service.GOOGLE] += 1
+        if item.get(Provider.FOURSQUARE):
+            statistic[Provider.FOURSQUARE] += 1
+        if item.get(Provider.FACEBOOK):
+            statistic[Provider.FACEBOOK] += 1
+        if item.get(Provider.GOOGLE):
+            statistic[Provider.GOOGLE] += 1
         statistic[str(len(item.keys()))] += 1
         if len(item.keys()) == 3:
             returned_results.append(item)

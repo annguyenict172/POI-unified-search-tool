@@ -1,8 +1,8 @@
 from app import db
 
 
-class Category(db.Model):
+class Term(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    text = db.Column(db.String(length=100))
-    service = db.Column(db.String(length=20))
-    service_identifier = db.Column(db.String(length=100))
+    term = db.Column(db.String(length=20))
+    provider = db.Column(db.String(length=20))
+    matched_term = db.Column(db.String(length=20))

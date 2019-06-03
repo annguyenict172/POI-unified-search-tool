@@ -1,10 +1,10 @@
-from app.constants import Service
+from app.constants import Provider
 from app.schemas import GoogleSchema, FacebookSchema, FoursquareSchema
 
 Schema = {
-    Service.GOOGLE: GoogleSchema,
-    Service.FOURSQUARE: FoursquareSchema,
-    Service.FACEBOOK: FacebookSchema
+    Provider.GOOGLE: GoogleSchema,
+    Provider.FOURSQUARE: FoursquareSchema,
+    Provider.FACEBOOK: FacebookSchema
 }
 
 
@@ -16,7 +16,7 @@ class DataPreprocessor:
         results = []
 
         # Add response from different services to a single list
-        for service in Service.get_list():
+        for service in Provider.get_list():
             # Use Schema as an Adapter
             items = Schema[service]().dump(self.data[service], many=True).data
 

@@ -1,4 +1,4 @@
-class Service:
+class Provider:
     GOOGLE = 'google'
     FOURSQUARE = 'foursquare'
     FACEBOOK = 'facebook'

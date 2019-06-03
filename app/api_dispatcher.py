@@ -4,7 +4,7 @@ import time
 import threading
 
 from app.api import FoursquareAPI, GooglePlaceAPI, FacebookAPI
-from app.constants import Service
+from app.constants import Provider
 
 
 class APIDispatcher:
@@ -15,9 +15,9 @@ class APIDispatcher:
     def __init__(self, args):
         self.args = args
         self.results = {
-            Service.FOURSQUARE: [],
-            Service.FACEBOOK: [],
-            Service.GOOGLE: []
+            Provider.FOURSQUARE: [],
+            Provider.FACEBOOK: [],
+            Provider.GOOGLE: []
         }
 
     def dispatch_api_calls(self):
@@ -27,9 +27,9 @@ class APIDispatcher:
             facebook_file = open('files/facebook-{}.json'.format(demo_city), 'r')
             google_file = open('files/google-{}.json'.format(demo_city), 'r')
             self.results = {
-                Service.GOOGLE: json.load(google_file),
-                Service.FACEBOOK: json.load(facebook_file),
-                Service.FOURSQUARE: json.load(foursquare_file)
+                Provider.GOOGLE: json.load(google_file),
+                Provider.FACEBOOK: json.load(facebook_file),
+                Provider.FOURSQUARE: json.load(foursquare_file)
             }
         else:
             threads = [
@@ -49,7 +49,7 @@ class APIDispatcher:
     def _query_from_facebook(self):
         after = None
         results = []
-        params = self.args.get(Service.FACEBOOK)
+        params = self.args.get(Provider.FACEBOOK)
         if len(params.get('categories')) > 0:
             for category in params.get('categories'):
                 category = '["{}"]'.format(category)
@@ -90,11 +90,11 @@ class APIDispatcher:
         with open('files/facebook-HN.json', 'w') as outfile:
             json.dump(results, outfile)
         print('FACEBOOK {}'.format(len(results)))
-        self.results[Service.FACEBOOK] = results
+        self.results[Provider.FACEBOOK] = results
 
     def _query_from_google(self):
         results = []
-        params = self.args.get(Service.GOOGLE)
+        params = self.args.get(Provider.GOOGLE)
         if len(params.get('types')) > 0:
             types = params.pop('types')
             for type in types:
@@ -124,11 +124,11 @@ class APIDispatcher:
         with open('files/google-HN.json', 'w') as outfile:
             json.dump(results, outfile)
         print('GOOGLE {}'.format(len(results)))
-        self.results[Service.GOOGLE] = results
+        self.results[Provider.GOOGLE] = results
 
     def _query_from_foursquare(self):
         results = []
-        params = self.args.get(Service.FOURSQUARE)
+        params = self.args.get(Provider.FOURSQUARE)
         if len(params.get('sections')) > 0:
             sections = params.pop('sections')
             for section in sections:
@@ -164,4 +164,4 @@ class APIDispatcher:
         with open('files/foursquare-HN.json', 'w') as outfile:
             json.dump(results, outfile)
         print('FOURSQUARE {}'.format(len(results)))
-        self.results[Service.FOURSQUARE] = results
+        self.results[Provider.FOURSQUARE] = results

@@ -1,6 +1,6 @@
-from .models import Category
+from .models import Term
 from .utils.math import get_euclidean_distance
-from .constants import Service
+from .constants import Provider
 
 
 class CacheResultFilter:
@@ -11,9 +11,9 @@ class CacheResultFilter:
             'lng': float(args.get('location').split(',')[1])
         }
         appeared = {
-            Service.FACEBOOK: {},
-            Service.FOURSQUARE: {},
-            Service.GOOGLE: {}
+            Provider.FACEBOOK: {},
+            Provider.FOURSQUARE: {},
+            Provider.GOOGLE: {}
         }
         if args.get('categories'):
             results = []
@@ -22,9 +22,9 @@ class CacheResultFilter:
             for category in categories:
                 counts[category] = 0
             for category in categories:
-                gg_cat = Category.query.filter_by(service='google', text=category).first().service_identifier
-                fb_cat = Category.query.filter_by(service='facebook', text=category).first().service_identifier
-                fs_cat = Category.query.filter_by(service='foursquare', text=category).first().service_identifier
+                gg_cat = Term.query.filter_by(provider='google', term=category).first().matched_term
+                fb_cat = Term.query.filter_by(provider='facebook', term=category).first().matched_term
+                fs_cat = Term.query.filter_by(provider='foursquare', term=category).first().matched_term
                 fb_cat = '["{}"]'.format(fb_cat)
                 for item in cache_results:
                     if item.get('facebook') \
