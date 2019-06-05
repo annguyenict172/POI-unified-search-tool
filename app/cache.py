@@ -7,10 +7,19 @@ r = redis.Redis(host='localhost', port=6379, db=0)
 class Cache:
     @staticmethod
     def get_from_location(location):
-        value = r.get(location)
-        if value is not None:
-            return json.loads(value)
+        results = r.get(location)
+        if results is not None:
+            return json.loads(results)
 
     @staticmethod
-    def set_cache_with_location(location, value):
-        r.set(location, json.dumps(value))
+    def set_cache_with_location(location, results):
+        appeared = {}
+        for item in results:
+            try:
+                if appeared.get(item['id']) is None:
+                    appeared[item['id']] = True
+                else:
+                    results.remove(item)
+            except KeyError:
+                results.remove(item)
+        r.set(location, json.dumps(results))

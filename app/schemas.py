@@ -16,8 +16,8 @@ class FacebookSchema(Schema):
     phone = fields.String()
     picture = fields.Dict()
     website = fields.String()
-    service = fields.String(default=Provider.FACEBOOK)
-    unified_type = fields.String()
+    provider = fields.String(default=Provider.FACEBOOK)
+    unified_category = fields.String()
 
 
 class FoursquareSchema(Schema):
@@ -28,8 +28,9 @@ class FoursquareSchema(Schema):
     name = fields.String(attribute='venue.name')
     lat = fields.Float(attribute='venue.location.lat')
     lng = fields.Float(attribute='venue.location.lng')
-    service = fields.String(default=Provider.FOURSQUARE)
-    unified_type = fields.String()
+    id = fields.String(attribute='venue.id')
+    provider = fields.String(default=Provider.FOURSQUARE)
+    unified_category = fields.String()
 
 
 class GoogleSchema(Schema):
@@ -49,5 +50,5 @@ class GoogleSchema(Schema):
     types = fields.List(fields.String())
     user_ratings_total = fields.Integer()
     vicinity = fields.String()
-    service = fields.String(default=Provider.GOOGLE)
-    unified_type = fields.String()
+    provider = fields.String(default=Provider.GOOGLE)
+    unified_category = fields.String()

@@ -1,5 +1,3 @@
-import json
-
 from flask import Flask, jsonify
 from marshmallow import Schema, fields
 from flask_cors import CORS
@@ -17,12 +15,15 @@ migrate = Migrate(app, db)
 
 from app.models import *
 from app.api_dispatcher import APIDispatcher
-from app import parameter_parser
-from app.data_aggregator import DataAggregator
-from app.data_preprocessor import DataPreprocessor
+from app.parameter_parser import ParametersParser
+from app.result_aggregator import ResultAggregator
+from app.response_formatter import ResponseFormatter
 from app.cache import Cache
 from app.cache_result_filter import CacheResultFilter
 from app.constants import Provider
+
+
+MINIMUM_NUM_OF_PROVIDERS = 2
 
 
 class FindPlaceSchema(Schema):
@@ -35,35 +36,51 @@ class FindPlaceSchema(Schema):
 @app.route('/places/explore')
 @parse_args_with(FindPlaceSchema)
 def explore_places(args):
-    arguments = parameter_parser.parse_parameters(raw_params=args)
+    parameters = ParametersParser(parameters=args).parse_parameters()
     cache_results = Cache.get_from_location(args['location'])
     if cache_results is None:
-        responses = APIDispatcher(args=arguments).dispatch_api_calls()
-        preprocessed_data = DataPreprocessor(data=responses).process_data()
-        results = DataAggregator(data=preprocessed_data).aggregate_data()
-        Cache.set_cache_with_location(args['location'], results)
+        # Dispatch API calls
+        responses = APIDispatcher(parameters=parameters).dispatch_api_calls()
+        # Format the responses from multiple providers to a consistent format
+        formatted_responses = ResponseFormatter(raw_responses=responses).format_responses()
+        # Save the formatted results into cache
+        Cache.set_cache_with_location(args['location'], formatted_responses)
+        # Aggregate the final results
+        results = ResultAggregator(data=formatted_responses).aggregate_results()
     else:
+        # Filter the cache results. If the cache results do not satisfy all search parameters,
+        # we will continue to make API calls using the search parameters which were not satisfied
         results, remaining_categories = CacheResultFilter.filter_cache_results(args, cache_results)
-        if len(remaining_categories) > 0:
-            args['categories'] = ','.join(remaining_categories)
-            arguments = parameter_parser.parse_parameters(raw_params=args)
-            responses = APIDispatcher(args=arguments).dispatch_api_calls()
-            preprocessed_data = DataPreprocessor(data=responses).process_data()
-            new_results = DataAggregator(data=preprocessed_data).aggregate_data()
-            results.extend(new_results)
-            cache_results.extend(new_results)
+        if len(remaining_categories) != 0 or len(results) == 0:
+            if len(remaining_categories) != 0:
+                args['categories'] = ','.join(remaining_categories)
+            parameters = ParametersParser(parameters=args).parse_parameters()
+            # Dispatch API calls
+            responses = APIDispatcher(parameters=parameters).dispatch_api_calls()
+            # Format the responses from multiple providers to a consistent format
+            formatted_responses = ResponseFormatter(raw_responses=responses).format_responses()
+            # Extend the cache results and save them
+            cache_results.extend(formatted_responses)
             Cache.set_cache_with_location(args['location'], cache_results)
+            # Aggregate the final results
+            results.extend(formatted_responses)
+            results = ResultAggregator(data=results).aggregate_results()
         else:
-            if len(results) < 10:
-                arguments = parameter_parser.parse_parameters(raw_params=args)
-                responses = APIDispatcher(args=arguments).dispatch_api_calls()
-                preprocessed_data = DataPreprocessor(data=responses).process_data()
-                new_results = DataAggregator(data=preprocessed_data).aggregate_data()
-                results.extend(new_results)
-                cache_results.extend(new_results)
-                Cache.set_cache_with_location(args['location'], cache_results)
+            # Aggregate the final results
+            results = ResultAggregator(data=results).aggregate_results()
 
-    returned_results = []
+    limited_results = []
+    for item in results:
+        if len(item.keys()) >= MINIMUM_NUM_OF_PROVIDERS:
+            limited_results.append(item)
+
+    return jsonify({
+        'statistic': calculate_results_statistic(results),
+        'results': limited_results
+    })
+
+
+def calculate_results_statistic(results):
     statistic = {
         Provider.GOOGLE: 0,
         Provider.FACEBOOK: 0,
@@ -80,10 +97,4 @@ def explore_places(args):
         if item.get(Provider.GOOGLE):
             statistic[Provider.GOOGLE] += 1
         statistic[str(len(item.keys()))] += 1
-        if len(item.keys()) == 3:
-            returned_results.append(item)
-
-    return jsonify({
-        'statistics': statistic,
-        'results': returned_results
-    })
+    return statistic
