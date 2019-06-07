@@ -36,7 +36,7 @@ class FoursquareSchema(Schema):
 class GoogleSchema(Schema):
     geometry = fields.Dict()
     icon = fields.String()
-    id = fields.String()
+    id = fields.String(attribute='place_id')
     name = fields.String()
     lat = fields.Float(attribute='geometry.location.lat')
     lng = fields.Float(attribute='geometry.location.lng')

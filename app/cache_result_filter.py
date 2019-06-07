@@ -35,7 +35,7 @@ class CacheResultFilter:
         for item in cache_results:
             if item['provider'] not in Provider.get_list():
                 continue
-            if appeared.get(item['name']) is not None:
+            if appeared.get(item.get('id')) is not None:
                 continue
             if categories and not item.get('unified_category'):
                 continue
@@ -46,13 +46,16 @@ class CacheResultFilter:
             if get_euclidean_distance(current_location, item) > radius:
                 continue
 
-            results.append(item)
-            if categories and item.get('unified_category') \
-                and item.get('unified_category') in remaining_categories[item.get('provider')]:
+            try:
+                appeared[item['id']] = True
+                results.append(item)
+                if categories and item.get('unified_category') \
+                        and item.get('unified_category') in remaining_categories[item.get('provider')]:
                     for category in remaining_categories[item.get('provider')]:
                         if category == item.get('unified_category'):
                             remaining_categories[item.get('provider')].remove(category)
-            appeared[item['id']] = True
+            except KeyError:
+                print(item['provider'])
 
         unified_remaining_categories = set()
         if categories:
