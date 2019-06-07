@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, jsonify
 from marshmallow import Schema, fields
 from flask_cors import CORS
@@ -23,7 +24,7 @@ from app.cache_result_filter import CacheResultFilter
 from app.constants import Provider
 
 
-MINIMUM_NUM_OF_PROVIDERS = 2
+MINIMUM_NUM_OF_PROVIDERS = 3
 
 
 class FindPlaceSchema(Schema):
@@ -98,3 +99,32 @@ def calculate_results_statistic(results):
             statistic[Provider.GOOGLE] += 1
         statistic[str(len(item.keys()))] += 1
     return statistic
+
+
+class GoogleDetail(Schema):
+    place_id = fields.String(required=True)
+
+
+@app.route('/google/details')
+@parse_args_with(GoogleDetail)
+def get_google_detail(args):
+    res = requests.get('https://maps.googleapis.com/maps/api/place/details/json', params={
+        'placeid': args['place_id'],
+        'key': Config.GOOGLE_PLACE_API_KEY
+    })
+    return jsonify(res.json())
+
+
+class GooglePhoto(Schema):
+    photo_reference = fields.String(required=True)
+
+
+@app.route('/google/photo')
+@parse_args_with(GooglePhoto)
+def get_google_photo(args):
+    res = requests.get('https://maps.googleapis.com/maps/api/place/photo', params={
+        'maxwidth': 400,
+        'photoreference': args['photo_reference'],
+        'key': Config.GOOGLE_PLACE_API_KEY
+    })
+    return jsonify({'link': res.url})

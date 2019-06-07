@@ -11,7 +11,7 @@ class ParametersParser:
         for provider in Provider.get_list():
             formatted_params[provider] = {}
             for key, val in self.parameters.items():
-                if key == 'categories' and val is not None:
+                if key == 'categories' and val:
                     value = self._find_matched_categories(val.split(','), provider)
                 else:
                     value = val

@@ -13,6 +13,7 @@ class CacheResultFilter:
             'lat': float(args.get('location').split(',')[0]),
             'lng': float(args.get('location').split(',')[1])
         }
+
         categories = keyword = None
         if args.get('categories'):
             categories = args.get('categories').split(',')
@@ -53,9 +54,11 @@ class CacheResultFilter:
                             remaining_categories[item.get('provider')].remove(category)
             appeared[item['id']] = True
 
-        unified_remaining_categories = []
-        for category in remaining_categories[Provider.GOOGLE]:
-            term_model = Term.query.filter_by(provider=Provider.GOOGLE, matched_term=category).first()
-            unified_remaining_categories.append(term_model.term)
+        unified_remaining_categories = set()
+        if categories:
+            for provider in Provider.get_list():
+                for category in remaining_categories[provider]:
+                    term_model = Term.query.filter_by(provider=provider, matched_term=category).first()
+                    unified_remaining_categories.add(term_model.term)
 
-        return results, unified_remaining_categories
+        return results, list(unified_remaining_categories)
