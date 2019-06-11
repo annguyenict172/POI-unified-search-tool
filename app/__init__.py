@@ -27,6 +27,19 @@ from app.constants import Provider
 MINIMUM_NUM_OF_PROVIDERS = 3
 
 
+class ItemSchema(Schema):
+    name = fields.String()
+    lat = fields.Float()
+    lng = fields.Float()
+    provider = fields.String()
+
+
+class MergedSchema(Schema):
+    facebook = fields.Nested(ItemSchema())
+    google = fields.Nested(ItemSchema())
+    foursquare = fields.Nested(ItemSchema())
+
+
 class FindPlaceSchema(Schema):
     location = fields.String(required=True)
     keyword = fields.String(missing=None)
