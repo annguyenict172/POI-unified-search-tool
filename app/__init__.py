@@ -29,9 +29,9 @@ MINIMUM_NUM_OF_PROVIDERS = 3
 
 class ItemSchema(Schema):
     name = fields.String()
-    lat = fields.Float()
-    lng = fields.Float()
-    provider = fields.String()
+    # lat = fields.Float()
+    # lng = fields.Float()
+    # provider = fields.String()
 
 
 class MergedSchema(Schema):
@@ -90,7 +90,7 @@ def explore_places(args):
 
     return jsonify({
         'statistic': calculate_results_statistic(results),
-        'results': limited_results
+        'results': MergedSchema().dump(limited_results, many=True)
     })
 
 
