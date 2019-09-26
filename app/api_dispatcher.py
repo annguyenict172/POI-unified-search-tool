@@ -21,28 +21,17 @@ class APIDispatcher:
         }
 
     def dispatch_api_calls(self):
-        demo_city = os.environ.get('DEMO_CITY', None)
-        if demo_city:
-            foursquare_file = open('files/foursquare-{}.json'.format(demo_city), 'r')
-            facebook_file = open('files/facebook-{}.json'.format(demo_city), 'r')
-            google_file = open('files/google-{}.json'.format(demo_city), 'r')
-            self.results = {
-                Service.GOOGLE: json.load(google_file),
-                Service.FACEBOOK: json.load(facebook_file),
-                Service.FOURSQUARE: json.load(foursquare_file)
-            }
-        else:
-            threads = [
-                threading.Thread(target=self._query_from_google),
-                threading.Thread(target=self._query_from_facebook),
-                threading.Thread(target=self._query_from_foursquare),
-            ]
+        threads = [
+            threading.Thread(target=self._query_from_google),
+            threading.Thread(target=self._query_from_facebook),
+            threading.Thread(target=self._query_from_foursquare),
+        ]
 
-            for thread in threads:
-                thread.start()
+        for thread in threads:
+            thread.start()
 
-            for thread in threads:
-                thread.join()
+        for thread in threads:
+            thread.join()
 
         return self.results
 
@@ -87,9 +76,6 @@ class APIDispatcher:
                         break
                 else:
                     break
-        with open('files/facebook-HN.json', 'w') as outfile:
-            json.dump(results, outfile)
-        print('FACEBOOK {}'.format(len(results)))
         self.results[Service.FACEBOOK] = results
 
     def _query_from_google(self):
@@ -121,9 +107,6 @@ class APIDispatcher:
                 time.sleep(2)
                 if pagetoken is None:
                     break
-        with open('files/google-HN.json', 'w') as outfile:
-            json.dump(results, outfile)
-        print('GOOGLE {}'.format(len(results)))
         self.results[Service.GOOGLE] = results
 
     def _query_from_foursquare(self):
@@ -161,7 +144,4 @@ class APIDispatcher:
                 if len(results) == last_length:
                     break
                 last_length = len(results)
-        with open('files/foursquare-HN.json', 'w') as outfile:
-            json.dump(results, outfile)
-        print('FOURSQUARE {}'.format(len(results)))
         self.results[Service.FOURSQUARE] = results
