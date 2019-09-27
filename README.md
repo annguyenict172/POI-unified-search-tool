@@ -29,9 +29,15 @@ The response will be given under this format:
 ```json
 [
   {
-    "facebook": {}, // properties of this place in Facebook
-    "foursquare": {}, // properties of this place in Foursquare
-    "google": {} // properties of this place in Google
-  }
+    "facebook": {
+      "description": "properties of this place in Facebook"
+    },
+    "foursquare": {
+       "description": "properties of this place in Foursquare"
+    },
+    "google": {
+       "description": "properties of this place in Google"
+    }
+  },
 ]
 ```
