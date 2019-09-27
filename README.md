@@ -1,8 +1,11 @@
-# travel-planner-server
+# POI Unified Search Tool
 
-1. Install `pipenv`
-2. Go to this folder `$ cd travel-planner-server`
-3. Install the project dependencies by running `$ pipenv install`
-4. Update the `.env` file with the appropriate credentials (see `.env.example`)
+### Description
+
+1. Change this folder name from `20140016` to `travel-planner-server`
+2. Install `pipenv`
+3. Go to this folder `$ cd travel-planner-server`
+4. Install the project dependencies by running `$ pipenv install`
+5. Update the `.env` file with the appropriate credentials (see `.env.example`)
 6. Install `redis` and run it on port 6379
-5. Run the server: `$ sh start.sh`. The server will be available on port 5000
+7. Run the server: `$ sh start.sh`. The server will be available on port 5000
